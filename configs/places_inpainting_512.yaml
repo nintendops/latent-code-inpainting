@@ -1,0 +1,184 @@
+model:
+  base_learning_rate: 4.5e-06
+  target: core.models.inpainting_master.InpaintingMaster
+  params:
+    stage: final # vq | encoder | decoder | transformer | final
+    encoder_choice: refined # vq | refined
+    image_key: image
+    ################# VQ model configuration ##########
+    vqmodel_config:
+      target: core.models.vqgan.VQModel
+      params:
+        ckpt_path: ckpts/places256_vqgan1024_BASE.ckpt
+        embed_dim: 256
+        n_embed: 1024
+        ddconfig:
+          padding_free: false
+          double_z: false
+          z_channels: 256
+          resolution: 256
+          in_channels: 3
+          out_ch: 3
+          ch: 128
+          ch_mult:
+          - 1
+          - 1
+          - 2
+          - 2
+          - 4
+          num_res_blocks: 2
+          attn_resolutions:
+          - 16
+          dropout: 0.0
+        lossconfig:
+          target: core.modules.losses.vqperceptual.VQLPIPSWithDiscriminator
+          params:
+            disc_conditional: False
+            disc_in_channels: 3
+            disc_start: 1
+            disc_weight: 0.8
+            codebook_weight: 1.0
+    ################## Encoder configuration #########################3
+    encoder_config:
+      target: core.models.encoder.MaskPartialEncoderModel
+      params:
+        ckpt_path: ckpts/places256_partialencoder.ckpt
+        embed_dim: 256
+        n_embed: 1024
+        image_key: "image"
+        ddconfig:
+          clamp_ratio: 0.25
+          padding_free: false
+          double_z: false
+          z_channels: 256
+          resolution: 256
+          in_channels: 3
+          out_ch: 3
+          ch: 128
+          ch_mult:
+          - 1
+          - 1
+          - 2
+          - 2
+          - 4
+          num_res_blocks: 2
+          attn_resolutions:
+          - 16
+          dropout: 0.0
+    ################## Decoder configuration #########################3
+    decoder_config:
+      target: core.models.decoder.decoder.PartialDecoder
+      params:
+        # ckpt_path: ckpts/places256_decoder.ckpt
+        embed_dim: 256
+        n_embed: 1024
+        image_key: image
+        restriction: false
+        ddconfig:
+          padding_free: false
+          double_z: false
+          z_channels: 256
+          resolution: 256
+          in_channels: 3
+          out_ch: 3
+          ch: 128
+          ch_mult:
+          - 1
+          - 1
+          - 2
+          - 2
+          - 4
+          num_res_blocks: 2
+          attn_resolutions:
+          - 16
+          dropout: 0.0
+        lossconfig:
+          target: core.modules.losses.vqperceptual.PIPSWithDiscriminator
+          params:
+            pixelloss_weight: 1.0
+            perceptual_weight: 1.0
+            r1_weight: 0.0
+            disc_conditional: false
+            disc_in_channels: 4
+            disc_start: 1
+            disc_weight: 0.8
+    ################## UNet Refinement configuration #####################
+    unet_config:
+      target: core.models.decoder.unet.RefinementUNet
+      params:
+        ckpt_path: ckpts/places_unet_512.ckpt
+        embed_dim: 256
+        input_res: 256
+        n_embed: 1024
+        image_key: image
+        freeze_firststage: false
+        edconfig:
+          padding_free: false
+          double_z: false
+          z_channels: 256
+          resolution: 256
+          in_channels: 3
+          out_ch: 3
+          ch: 128
+          ch_mult:
+          - 1
+          - 1
+          - 2
+          - 2
+          - 4
+          num_res_blocks: 2
+          attn_resolutions:
+          - 16
+          dropout: 0.0
+        ddconfig:
+          padding_free: false
+          double_z: false
+          z_channels: 256
+          resolution: 512
+          in_channels: 3
+          out_ch: 3
+          ch: 128
+          ch_mult:
+          - 1
+          - 1
+          - 1
+          - 2
+          - 2
+          - 4
+          num_res_blocks: 2
+          attn_resolutions:
+          - 16
+          dropout: 0.0
+    ################## Transformer configuration #########################
+    transformer_config:
+      target: core.models.transformer.Transformer
+      params:
+        ckpt_path: ckpts/places256_transformer.ckpt
+        cond_stage_key: segmentation
+        attention_extent: mask
+        mask_on_latent: false
+        transformer_config:
+          target: core.modules.transformer.mingpt.GPT
+          params:
+            vocab_size: 1025
+            block_size: 257  
+            n_layer: 40 # 24,40
+            n_head: 16
+            n_embd: 1408
+            embd_pdrop: 0.0
+            resid_pdrop: 0.0
+            attn_pdrop: 0.0
+        cond_stage_config: "__is_unconditional__"
+data:
+  target: main.DataModuleFromConfig
+  params:
+    batch_size: 4
+    test:
+      target: core.data.places365.Places
+      params:
+        dataroot: /home/chenh/data/val_large
+        maskroot: /home/chenh/data/masks_val_512_eval
+        crop_size: 512
+        rescale: True
+        rescale_size: 512
+        split: 'test'

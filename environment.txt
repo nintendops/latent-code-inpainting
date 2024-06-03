@@ -1,0 +1,16 @@
+albumentations==0.4.3
+opencv-python
+imageio==2.27.0
+imageio-ffmpeg==0.4.2
+pytorch-lightning==1.9.0
+omegaconf==2.0.1
+test-tube>=0.7.5
+streamlit>=0.73.1
+einops==0.3.0
+more-itertools>=8.0.0
+transformers==4.37.1
+ninja
+timm
+matplotlib
+ipdb
+notebook
