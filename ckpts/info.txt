@@ -1,0 +1,12 @@
+total 33127920
+
+  2198906965 Jun  2 01:47 celeba_decoder.ckpt
+   643647807 Jun  2 01:47 celeba_encoder.ckpt
+ 11766897373 Jun  2 01:48 celeba_transformer.ckpt
+   958211422 Oct 17  2023 celeba_vqgan.ckpt
+  1243793995 Jun  2 01:41 places256_decoder.ckpt
+   643625933 Jun  2 01:41 places256_partialencoder.ckpt
+ 11766897437 Jun  2 01:41 places256_transformer.ckpt
+  1531450677 Jun  2 01:41 places256_unet.ckpt
+   958141493 Jun  2 01:41 places256_vqgan1024_BASE.ckpt
+  2211353965 Jun  2 01:41 places_unet_512.ckpt
