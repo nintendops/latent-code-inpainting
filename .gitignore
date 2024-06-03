@@ -1,4 +1,4 @@
-ckpts/*
+*.ckpt
 logs/
 
 # Byte-compiled / optimized / DLL files
