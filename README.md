@@ -19,7 +19,7 @@ This repository contains the code (in PyTorch) for ''Don't Look into the Dark: L
 ## Getting Started
 The inpainting method in this repository utilizes priors learnt from discrete latent codes to diversely complete a masked image. The method works in both free-form and large-hole mask settings: 
 
-![](https://github.com/nintendops/latent-code-inpainting/blob/main/meida/github_inpainting.gif?raw=true)
+![](https://github.com/nintendops/latent-code-inpainting/blob/main/media/main.gif?raw=true)
 
 ## Requirements
 
