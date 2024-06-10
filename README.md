@@ -19,9 +19,7 @@ This repository contains the code (in PyTorch) for ''Don't Look into the Dark: L
 ## Getting Started
 The inpainting method in this repository utilizes priors learnt from discrete latent codes to diversely complete a masked image. The method works in both free-form and large-hole mask settings: 
 
-Solarized dark             |  Solarized Ocean
-:-------------------------:|:-------------------------:
-![](https://slm-assets.secondlife.com/assets/16766271/lightbox/Grassy_Squares.jpg)  |  ![](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQwDgqHwUNYmZ09hEmZPwU4jfUFV1qabtHJkA&usqp=CAU)
+![](https://github.com/nintendops/latent-code-inpainting/meida/github_inpainting.gif)
 
 ## Requirements
 
