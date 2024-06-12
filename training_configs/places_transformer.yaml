@@ -1,0 +1,68 @@
+model:
+  base_learning_rate: 4.5e-06
+  target: core.models.transformer.Transformer
+  params:
+    # ckpt_path: ckpts/places256_transformer.ckpt
+    cond_stage_key: segmentation
+    attention_extent: mask
+    mask_on_latent: true # set this to true during training only 
+    transformer_config:
+      target: core.modules.transformer.mingpt.GPT
+      params:
+        vocab_size: 1025
+        block_size: 257  # 257
+        n_layer: 40 # 24,40
+        n_head: 16
+        n_embd: 1408
+        embd_pdrop: 0.1
+        resid_pdrop: 0.1
+        attn_pdrop: 0.1
+    first_stage_config:
+      target: core.models.vqgan.VQModel
+      params:
+        ckpt_path: ckpts/places256_vqgan1024_BASE.ckpt
+        embed_dim: 256
+        n_embed: 1024
+        ddconfig:
+          padding_free: false
+          double_z: false
+          z_channels: 256
+          resolution: 256
+          in_channels: 3
+          out_ch: 3
+          ch: 128
+          ch_mult:
+          - 1
+          - 1
+          - 2
+          - 2
+          - 4
+          num_res_blocks: 2
+          attn_resolutions:
+          - 16
+          dropout: 0.0
+        lossconfig:
+          target: core.modules.losses.DummyLoss
+    cond_stage_config: "__is_unconditional__"
+
+data:
+  target: train.DataModuleFromConfig
+  params:
+    batch_size: 12
+    train:
+      target: core.data.places365.Places
+      params:
+        dataroot: /home/chenh/data/data_large
+        crop_size: 256
+        rescale: True
+        rescale_size: 256
+        split: 'train'
+    test:
+      target: core.data.places365.Places
+      params:
+        dataroot: /home/chenh/data/val_large
+        maskroot: /home/chenh/data/masks_val_512_eval
+        crop_size: 256
+        rescale: True
+        rescale_size: 256
+        split: 'test'

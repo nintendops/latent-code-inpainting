@@ -75,7 +75,7 @@ def get_parser(**parser_kwargs):
         "--train",
         type=str2bool,
         const=True,
-        default=False,
+        default=True,
         nargs="?",
         help="train",
     )
@@ -368,7 +368,7 @@ if __name__ == "__main__":
     #   params:
     #       key: value
     # data:
-    #   target: main.DataModuleFromConfig
+    #   target: train.DataModuleFromConfig
     #   params:
     #      batch_size: int
     #      wrap: bool
@@ -402,8 +402,8 @@ if __name__ == "__main__":
     now = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
 
     # add cwd for convenience and to make classes in this file available when
-    # running as `python main.py`
-    # (in particular `main.DataModuleFromConfig`)
+    # running as `python train.py`
+    # (in particular `train.DataModuleFromConfig`)
     sys.path.append(os.getcwd())
 
     parser = get_parser()
@@ -538,7 +538,7 @@ if __name__ == "__main__":
         # add callback which sets up log directory
         default_callbacks_cfg = {
             "setup_callback": {
-                "target": "main.SetupCallback",
+                "target": "train.SetupCallback",
                 "params": {
                     "resume": opt.resume,
                     "now": now,
@@ -550,7 +550,7 @@ if __name__ == "__main__":
                 }
             },
             "image_logger": {
-                "target": "main.ImageLogger",
+                "target": "train.ImageLogger",
                 "params": {
                     "batch_frequency": 2000,
                     "max_images": 4,
@@ -561,7 +561,7 @@ if __name__ == "__main__":
                 }
             },
             "learning_rate_logger": {
-                "target": "main.LearningRateMonitor",
+                "target": "train.LearningRateMonitor",
                 "params": {
                     "logging_interval": "step",
                     #"log_momentum": True

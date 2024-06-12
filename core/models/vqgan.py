@@ -4,8 +4,7 @@ import torch.nn.functional as F
 import pytorch_lightning as pl
 import cv2
 import numpy as np
-from main import instantiate_from_config
-
+from train import instantiate_from_config
 from core.modules.diffusionmodules.model import Encoder, Decoder, RestrictedDecoder
 from core.modules.vqvae.quantize import VectorQuantizer2 as VectorQuantizer
 from core.modules.vqvae.quantize import GumbelQuantize

@@ -5,7 +5,7 @@ import pytorch_lightning as pl
 import cv2
 import numpy as np
 import random
-from main import instantiate_from_config
+from train import instantiate_from_config
 from core.modules.util import write_images, scatter_mask, box_mask, mixed_mask, BatchRandomMask
 from core.modules.losses import DummyLoss
 training_stages = {'vq', 
@@ -155,7 +155,7 @@ class InpaintingMaster(pl.LightningModule):
 
     def forward(self, batch, mask=None, use_vq_decoder=False, simple_return=True, recomposition=False, use_unet=False):
         '''
-            forward with the complete model
+            forward with the complete model. TODO: codes here may not work for the 512-res model
         '''
         use_vanilla = False
         VQModel, Encoder, Transformer, Unet = self.helper_model
@@ -178,27 +178,13 @@ class InpaintingMaster(pl.LightningModule):
                 # small-hole random mask following MAT
                 # mask = torch.from_numpy(BatchRandomMask(x.shape[0], x.shape[-1], hole_range=[0,0.5])).to(x.device)
 
-        # mask override
-        # mask = box_mask(x.shape, x.device, 0.8, det=True)
-
         x_gt = x        
         x = mask * x
 
         # encoding image
-        if use_vanilla:
-            quant_z, _, info = VQModel.encode(x)
-            mask_out = torch.nn.functional.interpolate(mask.float(), (16,16))
-        else:
-            quant_z, _, info, mask_out = Encoder.encode(x, mask)
-
+        quant_z, _, info, mask_out = Encoder.encode(x, mask)
         mask_out = mask_out.reshape(x.shape[0], -1)
         z_indices = info[2].reshape(x.shape[0], -1)
-
-        ## PERFECT ENCODER #########################
-        quant_gt, _, info_gt = VQModel.encode(x_gt)
-        z_indices_gt = info_gt[2].reshape(x.shape[0], -1)
-        z_indices = z_indices_gt.int() * mask_out.int()
-        ############################################
 
         # inferring missing codes given the downsampled mask
         z_indices_complete = Transformer.forward_to_indices(batch, z_indices, mask_out, det=False)
@@ -208,19 +194,11 @@ class InpaintingMaster(pl.LightningModule):
         quant_z_complete = VQModel.quantize.get_codebook_entry(z_indices_complete.reshape(-1).int(), shape=(B, H, W, C))
 
         # decoding the features 
-        if use_vq_decoder:
-            return VQModel.decode(quant_z_complete)
-        else:
-            if use_vanilla:
-                dec = VQModel.decode(quant_z_complete)
-            else:
-                # mask_out_decoder = torch.round(torch.nn.functional.interpolate(mask_in, scale_factor=H/x.shape[-1]))
-                dec, _ = self.current_model(batch, 
-                                            quant=quant_z_complete, 
-                                            mask_in=mask, 
-                                            mask_out=mask_out.reshape(B, 1, H, W),
-                                            return_fstg=False)
-
+        dec, _ = self.current_model(batch, 
+                                    quant=quant_z_complete, 
+                                    mask_in=mask, 
+                                    mask_out=mask_out.reshape(B, 1, H, W),
+                                    return_fstg=False)
 
         if recomposition:
             # linear blending

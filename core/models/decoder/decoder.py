@@ -7,7 +7,7 @@ import numpy as np
 import random
 import torch.distributions as Dist
 import copy
-from main import instantiate_from_config
+from train import instantiate_from_config
 from core.modules.util import scatter_mask, box_mask, mixed_mask, RandomMask, BatchRandomMask
 from core.modules.diffusionmodules.model import PartialEncoder, Encoder, Decoder, StyleGANDecoder, MatEncoder, MaskEncoder
 from core.modules.vqvae.quantize import VectorQuantizer2 as VectorQuantizer
@@ -140,19 +140,26 @@ class PartialDecoder(pl.LightningModule):
         return feat
 
     @torch.no_grad()
-    def generate(self, batch, mask=None):
-        return self(batch, mask_in=mask, return_fstg=False)
+    def generate(self, batch, **kwargs):
+        return self(batch, **kwargs)
 
-    def forward(self, batch, quant=None, mask_in=None, mask_out=None, return_fstg=True, use_noise=True, debug=False):
+    def forward(self, batch, rescale=None, recomposition=True, quant=None, mask_in=None, mask_out=None, return_fstg=True, use_noise=True, debug=False):
 
-        input_raw = self.get_input(batch, self.image_key)
+        input_gt = self.get_input(batch, self.image_key)
+
+        if mask_in is None:
+            mask_gt = self.get_mask([input_gt.shape[0], 1, input_gt.shape[2], input_gt.shape[3]], input_gt.device)
+        else:
+            mask_gt = mask_in
+
+        if rescale is not None:
+            input_raw = torch.nn.functional.interpolate(input_gt, (rescale, rescale))
+            mask = torch.nn.functional.interpolate(mask_gt, (rescale, rescale))
+        else:
+            input_raw = input_gt
+            mask = mask_gt
 
         # first, get a composition of quantized reconstruction and the original image
-        if mask_in is None:
-            mask = self.get_mask([input_raw.shape[0], 1, input_raw.shape[2], input_raw.shape[3]], input_raw.device)
-        else:
-            mask = mask_in
-
         input = input_raw * mask
 
         ###### for comparison only ################
@@ -172,8 +179,8 @@ class PartialDecoder(pl.LightningModule):
             if self.first_stage_model_type == 'vae':
                 quant_gt, _, info = self.first_stage_model.encode(input_raw)
                 if use_noise:
+                    # noise augmentation: randomly replace indices from gt info (training only)
                     B, C, H, W = quant_gt.shape
-                    # randomly replace indices from gt info
                     gt_indices = info[2]
                     prob = 0.1
                     rand_indices = torch.rand(gt_indices.shape) * (self.n_embed - 1)
@@ -197,14 +204,16 @@ class PartialDecoder(pl.LightningModule):
         h = mask_out * h + quant * (1 - mask_out) * 0.5 + h * (1 - mask_out) * 0.5
 
         dec = self.decode(h)
-        dec = input + (1 - mask) * dec
+
+        if recomposition:
+            dec = input_gt + (1 - mask_gt) * dec
 
         if debug:
-            return dec, mask, mask_out, quant * (1 - mask_out), h * (1 - mask_out)
+            return dec, mask_gt, mask_out, quant * (1 - mask_out), h * (1 - mask_out)
         elif return_fstg:                
-            return dec, mask, x_comp
+            return dec, mask_gt, x_comp
         else:
-            return dec, mask
+            return dec, mask_gt
 
     def get_input(self, batch, k):
         x = batch[k]

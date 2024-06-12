@@ -4,7 +4,7 @@ import torch
 import torch.nn.functional as F
 import pytorch_lightning as pl
 import random
-from main import instantiate_from_config
+from train import instantiate_from_config
 from core.modules.util import SOSProvider, scatter_mask, box_mask, mixed_mask, RandomMask, BatchRandomMask
 
 

@@ -1,4 +1,5 @@
 
+
 # Pluralistic Image Inpainting with Latent Codes
 
 *This readme is still a work in progress, some links may not work*
@@ -32,26 +33,43 @@ python install -r environment.txt
 
 Our models are built upon training data from both [Places365-Standard](http://places2.csail.mit.edu/download-private.html) and [CelebA-HQ](https://github.com/tkarras/progressive_growing_of_gans).
 
-As the first step, please download the respective pretrained models ([Places]() | [CelebA-HQ]()) and places the checkpoint files under the ckpts folder in the root directory.
+As the first step, please download the respective pretrained models ([Places]() | [CelebA-HQ]()) and places the checkpoint files under the ```ckpts/``` folder in the root directory.
  
 
 **Quick Test**
 
-We provide a [demo notebook](https://github.com/nintendops/latent-code-inpainting/blob/main/eval.ipynb) for quickly testing the inpainting models. Please follow instructions in the notebook to set up inference with your desired configurations.
+We provide a [demo notebook](https://github.com/nintendops/latent-code-inpainting/blob/main/eval.ipynb) at ```eval.ipynb``` for quickly testing the inpainting models. Please follow instructions in the notebook to set up inference with your desired configurations.
 
 **Training**
 
-If you are interested in training our models on custom data, please ...
-
+If you are interested in training our models on custom data, please refer to the list of training configurations under the folder ```training_configs/```. To train everything from scratch, the complete model will need to go through a total of 4 training stages. Below lists the stages and their respective configuration templates:
+ ```
+Stage 1: training the VQGAN backbone 
+	- training_configs/places_vqgan.yaml 
+Stage 2: training the encoder module
+	- training_configs/places_partialencoder.yaml 
+Stage 3: training the transformer module
+	- training_configs/places_transformer.yaml 
+Stage 4: training the decoder module
+	- training_configs/places_unet_256.yaml 
+	- training_configs/places_unet_512.yaml 
 ```
-# modelnet classification
-CUDA_VISIBLE_DEVICES=0 python run_modelnet.py experiment -d PATH_TO_MODELNET40
-# modelnet shape alignment
-CUDA_VISIBLE_DEVICES=0 python run_modelnet_rotation.py experiment -d PATH_TO_MODELNET40
-# 3DMatch shape registration
-CUDA_VISIBLE_DEVICES=0 python run_3dmatch.py experiment -d PATH_TO_3DMATCH
-```
 
+Note that the modules for stage 2,3,4 can be trained independently, or concurrently,  as these stages only require a pretrained VQGAN backbone from stage 1. 
+
+Please modify the path to the dataset, the path to the pretrained model, and optionally other hyperparameters in these configuration files to suit your needs. The basic command for training these models is as follow:
+```
+python train.py --base PATH_TO_CONFIG -n NAME --gpus GPU_INDEX 
+```
+For instance, to train the VQGAN backbone on a single gpu at index 0:
+```
+python train.py --base training_configs/places_vqgan.yaml -n my_vqgan_backbone --gpus 0, 
+```
+ To train the transformer on multiple gpus at index 1,2,3:
+```
+python train.py --base training_configs/places_transformer.yaml -n my_transformer --gpus 1,2,3 
+```
+To evaluate the trained model, please follow configuration files in ```configs/``` to modify the respective paths to each module checkpoints.
 
 ## Contact
 Haiwei Chen: chw9308@hotmail.com

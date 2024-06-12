@@ -7,7 +7,7 @@ import torch
 import torch.nn.functional as F
 import torch.distributions as Dist
 import pytorch_lightning as pl
-from main import instantiate_from_config
+from train import instantiate_from_config
 from core.modules.util import scatter_mask, box_mask, mixed_mask, RandomMask, BatchRandomMask
 from core.modules.diffusionmodules.model import PartialEncoder, Encoder, Decoder, StyleGANDecoder, MatEncoder, MaskEncoder
 from core.modules.vqvae.quantize import VectorQuantizer2 as VectorQuantizer

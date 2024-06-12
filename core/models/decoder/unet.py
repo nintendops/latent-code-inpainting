@@ -7,7 +7,7 @@ import cv2
 import numpy as np
 import random
 import copy
-from main import instantiate_from_config
+from train import instantiate_from_config
 from core.modules.util import scatter_mask, box_mask, mixed_mask, RandomMask, BatchRandomMask
 from core.modules.diffusionmodules.model import PartialEncoder, Encoder, Decoder, MatEncoder, MaskEncoder
 from core.modules.vqvae.quantize import VectorQuantizer2 as VectorQuantizer
@@ -172,7 +172,6 @@ class RefinementUNet(pl.LightningModule):
             dec = mask * img + (1 - mask) * dec    
         return dec
 
-
     def forward(self, batch, quant=None, mask_in=None, mask_out=None, return_fstg=True, debug=False):
 
         input_raw = self.get_input(batch, self.image_key)
@@ -204,6 +203,7 @@ class RefinementUNet(pl.LightningModule):
                 x_raw, _ = self.first_stage_model.generate(batch, rescale=self.input_res, mask_in=mask_lr, recomposition=False)
             else:
                 x_raw, _ = self.first_stage_model(batch, rescale=self.input_res, mask_in=mask_lr, recomposition=False, return_fstg=False)
+
             x_comp = input_lr + (1 - mask_lr) * x_raw
         else:
             raise Exception(f"Unrecognized model type {self.first_stage_model_type}")

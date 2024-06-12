@@ -169,8 +169,6 @@ mask = torch.from_numpy(BatchRandomMask(x.shape[0], x.shape[-1], hole_range=[0.0
 
 # clamp ratio
 cr = 0.25
-use_vanilla = False
-
 
 with torch.no_grad():
     mask = torch.round(mask)    
@@ -198,4 +196,5 @@ with torch.no_grad():
         Unet = Unet.to(device)
         rec = Unet.refine(rec, mask)
 
+print(rec.shape)
 # imshow([to_img(x*mask),to_img(rec)], titles=['input', 'prediction'])

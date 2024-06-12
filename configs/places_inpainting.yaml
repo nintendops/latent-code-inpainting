@@ -150,7 +150,7 @@ model:
             attn_pdrop: 0.0
         cond_stage_config: "__is_unconditional__"
 data:
-  target: main.DataModuleFromConfig
+  target: train.DataModuleFromConfig
   params:
     batch_size: 4
     test:
