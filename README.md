@@ -25,7 +25,7 @@ The inpainting method in this repository utilizes priors learnt from discrete la
 
 The code has been tested on Python3.11, PyTorch 2.1.0 and CUDA (12.1). The additional dependencies can be installed with 
 ```
-python install -r environment.txt
+pip install -r environment.txt
 ```
 
 ## Getting Started
