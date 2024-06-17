@@ -2,7 +2,6 @@
 
 # Pluralistic Image Inpainting with Latent Codes
 
-*This readme is still a work in progress, some links may not work*
 
 [paper](https://arxiv.org/html/2403.18186v1) | [arXiv](https://arxiv.org/abs/2403.18186)
 
@@ -33,7 +32,7 @@ python install -r environment.txt
 
 Our models are built upon training data from both [Places365-Standard](http://places2.csail.mit.edu/download-private.html) and [CelebA-HQ](https://github.com/tkarras/progressive_growing_of_gans).
 
-As the first step, please download the respective pretrained models ([Places]() | [CelebA-HQ]()) and places the checkpoint files under the ```ckpts/``` folder in the root directory.
+As the first step, please download the respective pretrained models ([Places](https://drive.google.com/drive/folders/1ZchB85kuUjLpxcz-WSgPDbkfeFcPRjZL?usp=sharing) | [CelebA-HQ](https://drive.google.com/drive/folders/1-o9KefXQb7R8qE70luYU58u-ksXOgmBh?usp=sharing)) and places the checkpoint files under the ```ckpts/``` folder in the root directory.
  
 
 **Quick Test**
