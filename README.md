@@ -3,7 +3,7 @@
 # Pluralistic Image Inpainting with Latent Codes
 
 
-[paper](https://arxiv.org/html/2403.18186v1) | [arXiv](https://arxiv.org/abs/2403.18186)
+[paper]([https://arxiv.org/html/2403.18186v1](https://openaccess.thecvf.com/content/CVPR2024/html/Chen_Dont_Look_into_the_Dark_Latent_Codes_for_Pluralistic_Image_CVPR_2024_paper.html) | [arXiv](https://arxiv.org/abs/2403.18186)
 
 This repository contains the code (in PyTorch) for ''Don't Look into the Dark: Latent Codes for Pluralistic Image Inpainting'' (CVPR'2024) by Haiwei Chen and [Yajie Zhao](https://www.yajie-zhao.com/).
 
